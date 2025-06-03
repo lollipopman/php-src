@@ -579,10 +579,13 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 #endif
 		/* Determine the wait(2) exit status */
 		if (wstatus == -1) {
+			php_error_docref(NULL, E_WARNING, "Sendmail pclose failed %d (%s)", errno, strerror(errno));
 			MAIL_RET(0);
 		} else if (WIFSIGNALED(wstatus)) {
+			php_error_docref(NULL, E_WARNING, "Sendmail killed by signal %d (%s)", WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
 			MAIL_RET(0);
 		} else if (!WIFEXITED(wstatus)) {
+			php_error_docref(NULL, E_WARNING, "Sendmail did not exit");
 			MAIL_RET(0);
 		} else {
 			ret = WEXITSTATUS(wstatus);
@@ -597,6 +600,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 		if (ret != 0)
 #endif
 		{
+			php_error_docref(NULL, E_WARNING, "Sendmail exited with non-zero exit code %d", ret);
 			MAIL_RET(0);
 		} else {
 			MAIL_RET(1);
